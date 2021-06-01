@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Linq;
 using System.IO;
+using System.IO.Compression;
 
 namespace EpdmEvents
 {
@@ -21,6 +22,28 @@ namespace EpdmEvents
         private string filePath;
         private string fileDir;
 
+
+        public void LoadProblematicAssemblies()
+        {
+            var thisAssembly = new FileInfo(this.GetType().Assembly.Location);
+            var location = thisAssembly.Directory.FullName;
+
+            // extract references
+            ZipFile.ExtractToDirectory(System.IO.Path.Combine(location, $@"com.zip"), location);
+
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\itext.kernel.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\bouncycastle.crypto.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\common.logging.core.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\common.logging.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\itext.barcodes.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\itext.io.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\itext.layout.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\itext.pdfa.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\itext.sign.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\itext.styledxmlparser.dll"));
+            System.Reflection.Assembly.LoadFrom(System.IO.Path.Combine(location, $@"com\itext.svg.dll"));
+
+        }
 
         public void GetAddInInfo(ref EdmAddInInfo poInfo, IEdmVault5 poVault, IEdmCmdMgr5 poCmdMgr)
         {
@@ -43,6 +66,9 @@ namespace EpdmEvents
 
                 // Hook para un comando, usado en testing
                 poCmdMgr.AddCmd(1, "PDF MERGE", (int)EdmMenuFlags.EdmMenu_Nothing);
+
+
+                LoadProblematicAssemblies();
 
             }
             catch (System.Runtime.InteropServices.COMException ex)
